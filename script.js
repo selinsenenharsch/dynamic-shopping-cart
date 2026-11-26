@@ -3,19 +3,48 @@ const productPriceInput = document.getElementById('product-price');
 const addProductButton = document.getElementById('add-product');
 const cart = document.getElementById('cart');
 const totalPriceSpan = document.getElementById('total-price');
- 
+
 let totalPrice = 0;
- 
-// Function to update the total price
+
 function updateTotalPrice(amount) {
-  totalPrice += amount;
-  totalPriceSpan.textContent = totalPrice.toFixed(2);
+    totalPrice += amount;
+    totalPriceSpan.textContent = totalPrice.toFixed(2);
 }
- 
-// Function to remove an item
+
 function removeItem(event) {
-  const item = event.target.closest('li');
-  const price = parseFloat(item.dataset.price);
-  updateTotalPrice(-price);
-  item.remove();
+    const item = event.target.closest('li');
+    const price = parseFloat(item.dataset.price);
+    updateTotalPrice(-price);
+    item.remove();
 }
+
+addProductButton.addEventListener('click', function () {
+    const name = productNameInput.value.trim();
+    const price = parseFloat(productPriceInput.value);
+
+    if (name === '' || isNaN(price) || price <= 0) {
+        alert('Please enter a valid product name and a price greater than 0.');
+        return;
+    }
+
+  const li = document.createElement('li');
+  li.classList.add('cart-item');
+  li.dataset.price = price;     
+
+  const itemText = document.createElement('span');
+  itemText.textContent = `${name} - $${price.toFixed(2)}`;
+
+  const removeBtn = document.createElement('button');
+  removeBtn.textContent = 'Remove';
+  removeBtn.addEventListener('click', removeItem); 
+
+  li.appendChild(itemText);
+  li.appendChild(removeBtn);
+
+  cart.appendChild(li);
+
+  updateTotalPrice(price);
+
+  productNameInput.value = '';
+  productPriceInput.value = '';
+});
