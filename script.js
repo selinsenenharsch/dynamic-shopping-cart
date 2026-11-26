@@ -14,7 +14,9 @@ function updateTotalPrice(amount) {
 function removeItem(event) {
     const item = event.target.closest('li');
     const price = parseFloat(item.dataset.price);
-    updateTotalPrice(-price);
+    const qtyInput = item.querySelector('input[type="number"]');
+    const qty = qtyInput ? parseInt(qtyInput.value, 10) || 1 : 1;
+    updateTotalPrice(-(price * qty));
     item.remove();
 }
 
@@ -27,24 +29,48 @@ addProductButton.addEventListener('click', function () {
         return;
     }
 
-  const li = document.createElement('li');
-  li.classList.add('cart-item');
-  li.dataset.price = price;     
+    const li = document.createElement('li');
+    li.classList.add('cart-item');
+    li.dataset.price = price;
 
-  const itemText = document.createElement('span');
-  itemText.textContent = `${name} - $${price.toFixed(2)}`;
+    const itemText = document.createElement('span');
+    itemText.textContent = `${name} - $${price.toFixed(2)}`;
 
-  const removeBtn = document.createElement('button');
-  removeBtn.textContent = 'Remove';
-  removeBtn.addEventListener('click', removeItem); 
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.min = '1';
+    qtyInput.value = '1';
+    qtyInput.style.width = '60px';
+    let prevQty = 1;
 
-  li.appendChild(itemText);
-  li.appendChild(removeBtn);
+    qtyInput.addEventListener('change', function () {
+        let newQty = parseInt(qtyInput.value, 10);
 
-  cart.appendChild(li);
+        // If someone types 0, a negative number, or leaves it blank, snap back to 1
+        if (isNaN(newQty) || newQty < 1) {
+            newQty = 1;
+            qtyInput.value = '1';
+        }
 
-  updateTotalPrice(price);
+        const diff = newQty - prevQty; // How many more (or fewer) items?
+        updateTotalPrice(price * diff);
+        prevQty = newQty;
+    });
 
-  productNameInput.value = '';
-  productPriceInput.value = '';
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Remove';
+    removeBtn.addEventListener('click', removeItem);
+
+    li.appendChild(itemText);
+    li.appendChild(qtyInput);
+    li.appendChild(removeBtn);
+
+    cart.appendChild(li);
+
+    updateTotalPrice(price);
+
+    productNameInput.value = '';
+    productPriceInput.value = '';
 });
+
+
